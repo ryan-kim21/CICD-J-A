@@ -1,18 +1,21 @@
 pipeline {
     agent any
 
-    stage('Prepare Docker') {
+ 
+    stages {
+        stage('Prepare Docker') {
+            steps{
+        sh 'curl -fsSL https://get.docker.com -o get-docker.sh'
+        sh 'sh get-docker.sh'
+        sh 'sudo usermod -aG docker jenkins'
+            }
+        }
+        stage('Clone repository') {
     steps{
         sh 'curl -fsSL https://get.docker.com -o get-docker.sh'
         sh 'sh get-docker.sh'
         sh 'sudo usermod -aG docker jenkins'
     }
-}
-    stages {
-        stage('Clone repository') {
-            steps {
-                checkout scm
-            }
         }
         stage('Build image') {
             environment {
