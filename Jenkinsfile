@@ -1,10 +1,21 @@
 pipeline {
+
+  
+
     agent {
         docker {
             image 'docker:latest'
             args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
+
+    stages {
+        stage('Prepare Docker') {
+            sh 'curl -fsSL https://get.docker.com -o get-docker.sh'
+            sh 'sh get-docker.sh'
+            sh 'sudo usermod -aG docker jenkins'
+    }
+    
     stages {
         stage('Clone repository') {
             steps {
