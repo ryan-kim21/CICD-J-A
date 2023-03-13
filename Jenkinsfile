@@ -31,9 +31,9 @@ spec:
 """
     }
   }
-}
 
-{
+
+
     node('jenkins-agent-my-app') {
     def app
 
