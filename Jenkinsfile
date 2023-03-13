@@ -1,20 +1,40 @@
-podTemplate(
-    label: 'mypod',
-    volumes: [
+pipeline {
+  agent {
+    kubernetes {
+      // this label will be the prefix of the generated pod's name
+      label 'jenkins-agent-my-app'
+      yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    component: ci
+spec:
+  containers:
+    - name: docker
+      image: docker
+      command:
+        - cat
+      tty: true
+      volumeMounts:
+        - mountPath: /var/run/docker.sock
+          name: docker-sock
+    - name: kubectl
+      image: lachlanevenson/k8s-kubectl:v1.14.0 # use a version that matches your K8s version
+      command:
+        - cat
+      tty: true
+  volumes:
+    - name: docker-sock
+      hostPath:
+        path: /var/run/docker.sock
+"""
+    }
+  }
+}
 
-        hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
-    ],
-    containers:
-    [
-        containerTemplate(name: 'git', image: 'alpine/git', ttyEnabled: true, command: 'cat'),
-        containerTemplate(name: 'python', image: 'python:3.7.2', command: 'cat', ttyEnabled: true),
-        containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true,
-            envVars: [secretEnvVar(key: 'DOCKER_HUB_PASSWORD', secretName: 'docker-hub-password', secretKey: 'DOCKER_HUB_PASSWORD')]
-        )
-    ]
-)
 {
-    node('mypod') {
+    node('jenkins-agent-my-app') {
     def app
 
     stage('Clone repository') {
@@ -47,5 +67,5 @@ podTemplate(
                 echo "triggering updatemanifestjob"
                 build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
         }
-}
+    }
 }
