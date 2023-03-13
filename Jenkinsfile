@@ -32,40 +32,24 @@ spec:
     }
   }
 
-
-
-    node('jenkins-agent-my-app') {
-    def app
-
-    stage('Clone repository') {
-      
-
-        checkout scm
-    }
-
+  stages {
     stage('Build image') {
-       sh 'docker build -t my-image .'
-       app = docker.build("ryankim5100/test")
+      steps {
+        container('docker') {
+          sh "docker build -t your-registry/my-app:latest ."
+          sh "docker push your-registry/my-app:latest"
+        }
+      }
     }
 
-    stage('Test image') {
-  
-
-        app.inside {
-            sh 'echo "Tests passed"'
+    stage('Deploy') {
+      steps {
+        container('kubectl') {
+          sh "kubectl delete -f ./kubernetes/deployment.yaml"
+          sh "kubectl apply -f ./kubernetes/deployment.yaml"
+          sh "kubectl apply -f ./kubernetes/service.yaml"
         }
+      }
     }
-
-    stage('Push image') {
-        
-        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
-            app.push("${env.BUILD_NUMBER}")
-        }
-    }
-    
-    stage('Trigger ManifestUpdate') {
-                echo "triggering updatemanifestjob"
-                build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
-        }
-    }
+  }
 }
