@@ -1,16 +1,20 @@
 node {
     def app
+
     agent {
+
     kubernetes {
       label 'my-jenkins'
         }
     }
-    stages {
+
+    
     stage('Build Docker image') {
       steps {
         sh 'docker build -t my-image .'
       }
     }
+    
 
     stage('Clone repository') {
       
