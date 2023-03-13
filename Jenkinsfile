@@ -7,14 +7,14 @@ podTemplate(
     containers:
     [
         containerTemplate(name: 'git', image: 'alpine/git', ttyEnabled: true, command: 'cat'),
+        containerTemplate(name: 'python', image: 'python:3.7.2', command: 'cat', ttyEnabled: true),
         containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true,
             envVars: [secretEnvVar(key: 'DOCKER_HUB_PASSWORD', secretName: 'docker-hub-password', secretKey: 'DOCKER_HUB_PASSWORD')]
-        ),
-        containerTemplate(name: 'node', image: 'node:10-alpine', command: 'cat', ttyEnabled: true)
+        )
     ]
 )
 {
-node {
+    node('mypod') {
     def app
 
     stage('Clone repository') {
