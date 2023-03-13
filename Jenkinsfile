@@ -12,9 +12,7 @@ node {
     }
 
     stage('Build image') {
-        steps {
-         sh 'docker build -t my-image .'
-        }
+       sh 'docker build -t my-image .'
        app = docker.build("ryankim5100/test")
     }
 
