@@ -1,21 +1,10 @@
 node {
     def app
-
     agent {
-
-    kubernetes {
+        kubernetes {
       label 'my-jenkins'
         }
     }
-
-    
-    stage('Build Docker image') {
-      steps {
-        sh 'docker build -t my-image .'
-      }
-    }
-    
-
     stage('Clone repository') {
       
 
@@ -24,7 +13,7 @@ node {
 
     stage('Build image') {
   
-       app = docker.build("ryankim5100/testjenkins")
+       app = docker.build("ryankim5100/test")
     }
 
     stage('Test image') {
@@ -46,4 +35,4 @@ node {
                 echo "triggering updatemanifestjob"
                 build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
         }
-    }
+}
