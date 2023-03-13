@@ -1,29 +1,22 @@
+podTemplate(
+    label: 'mypod',
+    volumes: [
+        emptyDirVolume(mountPath: '/etc/gitrepo', memory: false),
+        hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
+    ],
+    containers:
+    [
+        containerTemplate(name: 'git', image: 'alpine/git', ttyEnabled: true, command: 'cat'),
+        containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true,
+            envVars: [secretEnvVar(key: 'DOCKER_HUB_PASSWORD', secretName: 'docker-hub-password', secretKey: 'DOCKER_HUB_PASSWORD')]
+        ),
+        containerTemplate(name: 'node', image: 'node:10-alpine', command: 'cat', ttyEnabled: true)
+    ]
+)
+{
 node {
     def app
-  agent {
-    kubernetes {
-      yaml """
-apiVersion: v1
-kind: Pod
-metadata:
-  labels:
-    jenkins: worker
-spec:
-  containers:
-  - name: kaniko
-    image: gcr.io/kaniko-project/executor:debug
-    command: ["/busybox/cat"]
-    tty: true
-    volumeMounts:
-      - name: dockercred
-        mountPath: /root/.docker/
-  volumes:
-  - name: dockercred
-    secret:
-      secretName: dockercred
-"""
-    }
-  }
+
     stage('Clone repository') {
       
 
@@ -54,4 +47,5 @@ spec:
                 echo "triggering updatemanifestjob"
                 build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
         }
+}
 }
